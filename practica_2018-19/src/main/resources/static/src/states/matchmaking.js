@@ -6,13 +6,13 @@ Spacewar.matchmakingState.prototype = {
 
 	init : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG JS] Entering **MATCH-MAKING** state");
+			console.log("[DEBUG] Entering **MATCH-MAKING** state");
 		}
 	},
 
 	preload : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG JS] Joining room...");
+			console.log("[DEBUG] Joining room...");
 		}
 		let message = {
 			event : 'JOIN ROOM'
@@ -27,7 +27,7 @@ Spacewar.matchmakingState.prototype = {
 	update : function() {
 		if (typeof game.global.myPlayer.room !== 'undefined') {
 			if (game.global.DEBUG_MODE) {
-				console.log("[DEBUG JS] Joined room " + game.global.myPlayer.room);
+				console.log("[DEBUG] Joined room " + game.global.myPlayer.room);
 			}
 			game.state.start('roomState')
 		}

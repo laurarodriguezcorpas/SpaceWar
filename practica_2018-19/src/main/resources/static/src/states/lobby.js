@@ -6,7 +6,7 @@ Spacewar.lobbyState.prototype = {
 
 	init : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG JS] Entering **LOBBY** state");
+			console.log("[DEBUG] Entering **LOBBY** state");
 		}
 	},
 

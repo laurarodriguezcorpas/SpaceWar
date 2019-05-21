@@ -11,20 +11,11 @@ public class Player extends Spaceship {
 	private final int playerId;
 	private final String shipType;
 	private Room room;	
-	//Informacion in-Game (esquina superior izquierda)
-	String name="";
-	int healthPoints;	//Puntos de vida
-	int ammoPoints;		//Cantidad de munición
-	int propellerPoints;	//Puntos del propulsor
 
 	public Player(int playerId, WebSocketSession session) {
 		this.playerId = playerId;
 		this.session = session;
 		this.shipType = this.getRandomShipType();
-		this.healthPoints=100;
-		this.ammoPoints=5;
-		this.propellerPoints=0;
-		//this.name -> hay que pasarle el nombre introducido por teclado
 	}
 
 	public int getPlayerId() {
@@ -57,9 +48,5 @@ public class Player extends Spaceship {
 		String ship = (randomShips[new Random().nextInt(randomShips.length)]);
 		ship += "_0" + (new Random().nextInt(5) + 1) + ".png";
 		return ship;
-	}
-
-	public void exitRoom() {
-		room.removePlayerFromRoom(this);
 	}
 }

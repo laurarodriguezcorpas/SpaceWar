@@ -32,7 +32,7 @@ public class SpacewarGame {
 
 		int countAllPlayers = numTotalPlayers.getAndIncrement();
 		if (DEBUG_MODE) 	
-			System.out.println("[DEBUG J] Player " + player.getSession().getId() + " se ha conectado al servidor.");
+			System.out.println("[DEBUG] Player " + player.getSession().getId() + " se ha conectado al servidor.");
 		
 		if (countAllPlayers == 0) {	//Si no hay jugadores, creo una sala nueva
 			createNewRoom(numRooms, player);
@@ -54,7 +54,7 @@ public class SpacewarGame {
 		numRooms.getAndIncrement();
 		room = new Room(numRooms, MAX_PLAYERS, this);	//Crea una sala con el numero de jugadores. He borrado el parámetro SpacewarGame (this)
 		if (DEBUG_MODE) 	
-			System.out.println("[DEBUG J] Room " + room.getId() + " creada por el player ["+ player.getSession().getId() + "]");
+			System.out.println("[DEBUG] Room " + room.getId() + " creada por el player ["+ player.getSession().getId() + "]");
 		room.addPlayerToRoom(player);			//Añade el anfitrión a la sala
 		rooms.add(room);						//Añade la sala a la lista de salas
 	}

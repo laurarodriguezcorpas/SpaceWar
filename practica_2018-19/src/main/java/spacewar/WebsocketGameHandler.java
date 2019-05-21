@@ -16,7 +16,6 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 	//Aquí debería abrirse el menú principal
 	private SpacewarGame game = SpacewarGame.INSTANCE;	//Game es un Singleton. No debería serlo, porque habrá varias partidas (?)
 	private static final String PLAYER_ATTRIBUTE = "PLAYER";
-	private static final boolean DEBUG_MODE = true;
 	private ObjectMapper mapper = new ObjectMapper();	//No usar muchos mapas (son costosos)
 	private AtomicInteger playerId = new AtomicInteger(0);
 	private AtomicInteger projectileId = new AtomicInteger(0);
@@ -68,7 +67,6 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 				msg.put("shipType", player.getShipType());
 				msg.put("room", "GLOBAL");
 				player.getSession().sendMessage(new TextMessage(msg.toString()));
-				
 				break;
 			case "UPDATE MOVEMENT":
 				player.loadMovement(node.path("movement").get("thrust").asBoolean(),
@@ -80,24 +78,11 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 					//game.addProjectile(projectile.getId(), projectile); 				//Linea original
 					player.getRoom().addProjectile(projectile.getId(), projectile);		//Linea mia (NO FUNCA)
 				}
-				
-				break;
-			case "REMOVE PLAYER":
-				//if (player.getSession()!=null && player.getRoom() != null)
-				player.exitRoom();
-				game.removePlayer(player);	//Elimino al jugador
-
-				Player playerAtt = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
-				game.removePlayer(playerAtt);	//Elimino al jugador
-				ObjectNode msgExit = mapper.createObjectNode();
-				msgExit.put("event", "REMOVE PLAYER");
-				msgExit.put("id", player.getPlayerId());//envío que tal jugador se ha ido a todos los jugadores
-				game.broadcast(msgExit.toString());	//Broadcast es para enviar mensajes globales
-				
 				break;
 			default:
 				break;
 			}
+
 		} catch (Exception e) {
 			System.err.println("Exception processing message " + message.getPayload());
 			e.printStackTrace(System.err);
@@ -106,13 +91,12 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-		/*
 		Player player = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
 		game.removePlayer(player);	//Elimino al jugador
 
 		ObjectNode msg = mapper.createObjectNode();
 		msg.put("event", "REMOVE PLAYER");
 		msg.put("id", player.getPlayerId());//envío que tal jugador se ha ido a todos los jugadores
-		game.broadcast(msg.toString());	//Broadcast es para enviar mensajes globales    */
+		game.broadcast(msg.toString());	//Broadcast es para enviar mensajes globales
 	}
 }
