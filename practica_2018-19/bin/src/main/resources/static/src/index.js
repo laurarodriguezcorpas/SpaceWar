@@ -120,7 +120,6 @@ window.onload = function() {
 	game.state.add('roomState', Spacewar.roomState)
 	game.state.add('gameState', Spacewar.gameState)
 
-
 	game.state.start('bootState')
 
 }
