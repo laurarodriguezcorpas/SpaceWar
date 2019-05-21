@@ -30,6 +30,7 @@ Spacewar.gameState.prototype = {
 			}
 			game.global.projectiles[i].image.anchor.setTo(0.5, 0.5)
 			game.global.projectiles[i].image.visible = false
+	        
 		}
 
 		// we load a random ship
@@ -43,11 +44,59 @@ Spacewar.gameState.prototype = {
 	},
 
 	create : function() {
+		
+		/* funciones ejemplo para modificar 
+		
+	    onPlusClick: function(){
+	        this.healthValue = this.healthValue + 10;
+	        if(this.healthValue > 100) this.healthValue = 100;
+	        this.myHealthBar.setPercent(this.healthValue);
+	      },
+	      onMinusClick: function(){
+	        this.healthValue = this.healthValue - 10;
+	        if(this.healthValue < 0) this.healthValue = 0;
+	        this.myHealthBar.setPercent(this.healthValue);
+	      },
+	      
+	     */
+		
+			////healthbar
+			var barConfig = {x: 200, y: 100 };
+			this.myHealthBar = new HealthBar(this.game, barConfig);
+			this.healthValue = 100;
+
+		
+			//////
+			////propulsor
+			var barConfig = {x: 200, y: 200};
+			this.myPropBar = new HealthBar(this.game, barConfig);
+		
+			//////
+			
+			////ammo
+			
+		    var barConfig = {x: 200, y: 300};
+			this.ammo = new HealthBar(this.game, barConfig);
+			this.text = game.add.text(this.ammo.x-50, this.ammo.y-20, this.maxProjectiles, { font: "30px Arial", fill: "#000000", align: "center" });
+			
+		
+			//////
+			
 		this.bulletTime = 0
+		this.tempBullets= this.maxProjectiles;
 		this.fireBullet = function() {
 			if (game.time.now > this.bulletTime) {
 				this.bulletTime = game.time.now + 250;
 				// this.weapon.fire()
+				
+				
+				//bar ammo update
+				this.tempBullets= this.tempBullets - 1;
+		        this.healthValue = this.healthValue - (100/800);
+		        if(this.healthValue < 0) this.healthValue = 0;
+		        this.ammo.setPercent(this.healthValue);
+		        this.text.text = this.tempBullets;
+		        
 				return true
 			} else {
 				return false

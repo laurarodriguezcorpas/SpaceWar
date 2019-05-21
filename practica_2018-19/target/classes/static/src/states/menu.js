@@ -51,7 +51,6 @@ Spacewar.menuState.prototype = {
 		    borderColor: '#000',
 		    borderRadius: 6,
 		    placeHolder: 'NOMBRA A TU TROPitA: ',
-		    type: PhaserInput.InputType.password
 		});
 		
 		function unirseARoom () {
