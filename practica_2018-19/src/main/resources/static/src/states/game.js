@@ -9,7 +9,7 @@ Spacewar.gameState.prototype = {
 
 	init : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG] Entering **GAME** state");
+			console.log("[DEBUG JS] Entering **GAME** state");
 		}
 	},
 
@@ -59,13 +59,51 @@ Spacewar.gameState.prototype = {
 		this.aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
+		// Añadir Q como botón para salir del juego
+	
+	
 		// Stop the following keys from propagating up to the browser
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W,
 				Phaser.Keyboard.S, Phaser.Keyboard.A, Phaser.Keyboard.D,
-				Phaser.Keyboard.SPACEBAR ]);
+				Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.Q ]);
 
 		game.camera.follow(game.global.myPlayer.image);
+		
+		// Informacion in-Game (esquina superior izquierda)
+		var usuarioText = 'Usuario ' + game.global.myPlayer.id;
+		this.name = game.add.text(5, 5, usuarioText, {
+			font : '18px Arial',
+			fill : '#0095DD'
+		});
+		this.healthPoints = game.add.text(5, 25, 'Vida: 100', {
+			font : '18px Arial',
+			fill : '#0095DD'
+		});
+		this.ammoPoints = game.add.text(5, 45, 'Munición: 0', {
+			font : '18px Arial',
+			fill : '#0095DD'
+		});
+		this.propellerPoints = game.add.text(5, 65, 'Propulsor: 0', {
+			font : '18px Arial',
+			fill : '#0095DD'
+		});
+		
+		//SI TOCAMOS LA Q, SALIMOS DE LA SALA
+		game.input.keyboard.onUpCallback = function(key){
+		    if(key.keyCode === Phaser.KeyCode.Q){
+		    	//myPlayer.state.start('menuState')
+				//myPlayer.room = null;
+				msgExit = new Object()
+				if (game.global.DEBUG_MODE) {
+					console.log("[DEBUG JS] Sending REMOVE PLAYER message to server")
+				}
+				msgExit.event = "REMOVE PLAYER";
+				
+				game.global.socket.send(JSON.stringify(msgExit))
+				
+				game.state.start('menuState')
+		    }
+		}
 	},
 
 	update : function() {
@@ -81,6 +119,8 @@ Spacewar.gameState.prototype = {
 
 		msg.bullet = false
 
+		
+		
 		if (this.wKey.isDown)
 			msg.movement.thrust = true;
 		if (this.sKey.isDown)
@@ -94,8 +134,9 @@ Spacewar.gameState.prototype = {
 		}
 
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG] Sending UPDATE MOVEMENT message to server")
+			console.log("[DEBUG JS] Sending UPDATE MOVEMENT message to server")
 		}
 		game.global.socket.send(JSON.stringify(msg))
-	}
+	},
+	
 }

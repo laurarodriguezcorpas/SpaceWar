@@ -19,14 +19,14 @@ window.onload = function() {
 	
 	game.global.socket.onopen = () => {
 		if (game.global.DEBUG_MODE) {
-			console.log('[DEBUG] WebSocket connection opened.')
+			console.log('[DEBUG JS] WebSocket connection opened.')
 		}
 		//Menú Principal ???
 	}
 
 	game.global.socket.onclose = () => {
 		if (game.global.DEBUG_MODE) {
-			console.log('[DEBUG] WebSocket connection closed.')
+			console.log('[DEBUG JS] WebSocket connection closed.')
 		}
 	}
 	
@@ -36,19 +36,19 @@ window.onload = function() {
 		switch (msg.event) {
 		case 'JOIN':	
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] JOIN message recieved')
+				console.log('[DEBUG JS] JOIN message recieved')
 				console.dir(msg)	//console.dir imprime un objeto
 			}
 			game.global.myPlayer.id = msg.id	//Se asignna un id al jugador 
 			game.global.myPlayer.shipType = msg.shipType	//Se asigna una nave al jugador
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] ID assigned to player: ' + game.global.myPlayer.id)
+				console.log('[DEBUG JS] ID assigned to player: ' + game.global.myPlayer.id)
 			}
 			break
 		case 'NEW ROOM' :	//Crea una sala
 			//Aquí es donde va toda la lógica de las salas
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] NEW ROOM message recieved')
+				console.log('[DEBUG JS] NEW ROOM message recieved')
 				console.dir(msg)
 			}
 			game.global.myPlayer.room = {	//Le asigna un nombre a la habitación nueva y se la pasa al jugador que la crea
@@ -57,7 +57,7 @@ window.onload = function() {
 			break
 		case 'JOIN TO EXISTING' :
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] JOIN TO EXISTING message recieved')
+				console.log('[DEBUG JS] JOIN TO EXISTING message recieved')
 				console.dir(msg)	
 			}
 			game.global.myPlayer.room = {	//Le asigna una room existente al jugador
@@ -66,7 +66,7 @@ window.onload = function() {
 			break
 		case 'GAME STATE UPDATE' :
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] GAME STATE UPDATE message recieved')
+				console.log('[DEBUG JS] GAME STATE UPDATE message recieved')
 				console.dir(msg)
 			}
 			if (typeof game.global.myPlayer.image !== 'undefined') {
@@ -113,9 +113,13 @@ window.onload = function() {
 			break
 		case 'REMOVE PLAYER' :
 			if (game.global.DEBUG_MODE) {
-				console.log('[DEBUG] REMOVE PLAYER message recieved')
+				console.log('[DEBUG JS] REMOVE PLAYER message recieved')
 				console.dir(msg.players)
 			}
+			/*
+			game.global.myPlayer.room = {	//Le asigna una room existente al jugador
+					myRoom : null
+			}   */
 			game.global.otherPlayers[msg.id].image.destroy()	//Busca a un jugador por su ID y borra su imagen
 			delete game.global.otherPlayers[msg.id]				//Elimina al jugador
 		default :

@@ -6,7 +6,7 @@ Spacewar.preloadState.prototype = {
 
 	init : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG] Entering **PRELOAD** state");
+			console.log("[DEBUG JS] Entering **PRELOAD** state");
 		}
 	},
 
