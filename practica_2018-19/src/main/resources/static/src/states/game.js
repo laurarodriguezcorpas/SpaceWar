@@ -60,6 +60,7 @@ Spacewar.gameState.prototype = {
 	      
 	     */
 		
+		/*
 			////healthbar
 			var barConfig = {x: 200, y: 100 };
 			this.myHealthBar = new HealthBar(this.game, barConfig);
@@ -79,7 +80,7 @@ Spacewar.gameState.prototype = {
 			this.ammo = new HealthBar(this.game, barConfig);
 			this.text = game.add.text(this.ammo.x-50, this.ammo.y-20, this.maxProjectiles, { font: "30px Arial", fill: "#000000", align: "center" });
 			
-		
+		*/
 			//////
 			
 		this.bulletTime = 0
@@ -108,8 +109,6 @@ Spacewar.gameState.prototype = {
 		this.aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
 		this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-		// Añadir Q como botón para salir del juego
-	
 	
 		// Stop the following keys from propagating up to the browser
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W,
