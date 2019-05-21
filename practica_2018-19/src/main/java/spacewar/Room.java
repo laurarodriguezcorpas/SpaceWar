@@ -31,7 +31,7 @@ public class Room {
 	private int id;		//Cambiar más adelante por el nombre de la sala
 	private SpacewarGame game;
 	private int maxPlayers;
-	private AtomicInteger numPlayers = new AtomicInteger(0);
+	private AtomicInteger numPlayersInRoom = new AtomicInteger(0);
 	private Map<String, Player> playersInRoom = new ConcurrentHashMap<>();
 	private Map<Integer, Projectile> projectiles = new ConcurrentHashMap<>();	//Cada room tiene su pool de proyectiles
 	
@@ -41,7 +41,7 @@ public class Room {
 	public Room (AtomicInteger id, int maxPlayers, SpacewarGame game){	
 		this.id = id.get();
 		this.maxPlayers = maxPlayers;
-		this.numPlayers.set(1);		//Al crear la sala, solo estará dentro el jugador que la ha creado
+		this.numPlayersInRoom.set(1);		//Al crear la sala, solo estará dentro el jugador que la ha creado
 		this.game = game;
 		
 		startGameLoop();
@@ -65,21 +65,30 @@ public class Room {
 	}
 	
 	public int getNumPlayersInRoom() {
-		return numPlayers.get();
+		return numPlayersInRoom.get();
 	}
 	
 	public void incrementNumPlayersInRoom () {
-		this.numPlayers.getAndIncrement();
+		this.numPlayersInRoom.getAndIncrement();
 	}
 	
 	public void addPlayerToRoom(Player player) {
 		playersInRoom.put(player.getSession().getId(), player);	//numPlayers los inserta en el mapa en el orden en el que entran (como una list)
 		
-		if (DEBUG_MODE)
-			System.out.println("[DEBUG] Room "+ id + ": se ha unido el player " + numPlayers + " (ID: [" + player.getSession().getId() + "]). Players en la room " + numPlayers);
-		
 		player.setRoom(this);
+		System.out.println("Sala: "+player.getRoom().getId());
 		
+		if (DEBUG_MODE)
+			System.out.println("[DEBUG J] Room "+ id + ": se ha unido el player " + player.getPlayerId() + " (ID: [" + player.getSession().getId() + "]). Players en la room " + numPlayersInRoom);
+	}
+	
+	public void removePlayerFromRoom(Player player) {
+		playersInRoom.remove(player.getSession().getId());	//numPlayers los inserta en el mapa en el orden en el que entran (como una list)
+		numPlayersInRoom.getAndDecrement();
+		
+		if (DEBUG_MODE)
+			System.out.println("[DEBUG J] Room "+ id + ": se ha ido el player " + player.getPlayerId() + " (ID: [" + player.getSession().getId() + "]). Players en la room " + numPlayersInRoom);
+		player.setRoom(null);
 		
 	}
 	
@@ -89,7 +98,7 @@ public class Room {
 			try {
 				player.getSession().sendMessage(new TextMessage(message.toString()));
 			} catch (Throwable ex) {
-				System.err.println("Execption sending message to player " + player.getSession().getId());
+				System.err.println("Exception sending message to player " + player.getSession().getId());
 				ex.printStackTrace(System.err);
 				game.removePlayer(player);
 			}
