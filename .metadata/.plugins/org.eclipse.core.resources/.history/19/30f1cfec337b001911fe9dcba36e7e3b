@@ -1,0 +1,106 @@
+package spacewar;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+public class WebsocketGameHandler extends TextWebSocketHandler {
+
+	//Aquí debería abrirse el menú principal
+	private SpacewarGame game = SpacewarGame.INSTANCE;	//Game es un Singleton. No debería serlo, porque habrá varias partidas (?)
+	private static final String PLAYER_ATTRIBUTE = "PLAYER";
+	private static final boolean DEBUG_MODE = true;
+	private ObjectMapper mapper = new ObjectMapper();	//No usar muchos mapas (son costosos)
+	private AtomicInteger playerId = new AtomicInteger(0);
+	private AtomicInteger projectileId = new AtomicInteger(0);
+
+	//Qué 3 cosas controla WebSocket: establecer la conexion, enviar mensajes, y cerrar la conexion
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {	//NO ES THREAD-SAFE
+		Player player = new Player(playerId.incrementAndGet(), session);	//Creo un jugador: le doy un ID y la info. de la sesion
+		session.getAttributes().put(PLAYER_ATTRIBUTE, player);	//Cada vez que llega sesion, puede obtener mi player
+
+		ObjectNode msg = mapper.createObjectNode();  //GENERA UN JSON
+		msg.put("event", "JOIN");
+		msg.put("id", player.getPlayerId());
+		msg.put("shipType", player.getShipType());
+		player.getSession().sendMessage(new TextMessage(msg.toString()));//Usar esto para enviar un mensaje a los jugadores
+		
+		game.addPlayer(player);
+	}
+
+	@Override
+	protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+		try {
+			JsonNode node = mapper.readTree(message.getPayload());	//para poder manejar el JSON. Node es la info. que me ha llegado
+			ObjectNode msg = mapper.createObjectNode();
+			Player player = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
+
+			switch (node.get("event").asText()) {
+			case "JOIN":
+				msg.put("event", "JOIN");
+				msg.put("id", player.getPlayerId());
+				msg.put("shipType", player.getShipType());
+				player.getSession().sendMessage(new TextMessage(msg.toString()));
+				break;
+			case "CREATE ROOM":	//NUEVO
+				msg.put("event", "NEW ROOM");
+				msg.put("id", player.getPlayerId());
+				msg.put("shipType", player.getShipType());
+				msg.put("room", "GLOBAL");
+				player.getSession().sendMessage(new TextMessage(msg.toString()));
+			
+				break;
+			case "JOIN ROOM":
+				/*	Codigo original de JOIN ROOM
+				msg.put("event", "NEW ROOM");
+				msg.put("room", "GLOBAL");
+				player.getSession().sendMessage(new TextMessage(msg.toString())); */
+				msg.put("event", "JOIN TO EXISTING");
+				msg.put("id", player.getPlayerId());
+				msg.put("shipType", player.getShipType());
+				msg.put("room", "GLOBAL");
+				player.getSession().sendMessage(new TextMessage(msg.toString()));
+				break;
+			case "UPDATE MOVEMENT":
+				player.loadMovement(node.path("movement").get("thrust").asBoolean(),
+						node.path("movement").get("brake").asBoolean(),
+						node.path("movement").get("rotLeft").asBoolean(),
+						node.path("movement").get("rotRight").asBoolean());
+				if (node.path("bullet").asBoolean()) {
+					Projectile projectile = new Projectile(player, this.projectileId.incrementAndGet());
+					//game.addProjectile(projectile.getId(), projectile); 				//Linea original
+					player.getRoom().addProjectile(projectile.getId(), projectile);		//Linea mia (NO FUNCA)
+				}
+				break;
+			case "EXIT GAME":
+				player.exitRoom();
+				break;
+			default:
+				break;
+			}
+
+		} catch (Exception e) {
+			System.err.println("Exception processing message " + message.getPayload());
+			e.printStackTrace(System.err);
+		}
+	}
+
+	@Override
+	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+		Player player = (Player) session.getAttributes().get(PLAYER_ATTRIBUTE);
+		game.removePlayer(player);	//Elimino al jugador
+
+		ObjectNode msg = mapper.createObjectNode();
+		msg.put("event", "REMOVE PLAYER");
+		msg.put("id", player.getPlayerId());//envío que tal jugador se ha ido a todos los jugadores
+		game.broadcast(msg.toString());	//Broadcast es para enviar mensajes globales
+	}
+}

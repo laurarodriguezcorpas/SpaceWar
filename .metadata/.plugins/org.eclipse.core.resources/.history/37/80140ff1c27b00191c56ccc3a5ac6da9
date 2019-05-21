@@ -1,0 +1,202 @@
+package spacewar;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.awt.List;
+import java.util.ArrayList;
+
+import java.util.concurrent.ScheduledExecutorService;
+
+import org.springframework.web.socket.TextMessage;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+public class Room {
+	//A room hay que pasar métodos de SpaceWarGame como tick, blablabla
+	//Aquí es donde se hace el gameloop para que cada room sea una partida independiente
+	//Tiene que tener un executor
+	public final static boolean DEBUG_MODE = true;
+	private final static int FPS = 30;
+	private final static long TICK_DELAY = 1000 / FPS;	//Cada cuanto se hace el GameLoop
+	
+	private boolean gameOver = false;	
+	private int id;		//Cambiar más adelante por el nombre de la sala
+	private SpacewarGame game;
+	private int maxPlayers;
+	private AtomicInteger numPlayersInRoom = new AtomicInteger(0);
+	private Map<String, Player> playersInRoom = new ConcurrentHashMap<>();
+	private Map<Integer, Projectile> projectiles = new ConcurrentHashMap<>();	//Cada room tiene su pool de proyectiles
+	
+	ObjectMapper mapper = new ObjectMapper();
+	private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);	
+	
+	public Room (AtomicInteger id, int maxPlayers, SpacewarGame game){	
+		this.id = id.get();
+		this.maxPlayers = maxPlayers;
+		this.numPlayersInRoom.set(1);		//Al crear la sala, solo estará dentro el jugador que la ha creado
+		this.game = game;
+		
+		startGameLoop();
+	}
+	
+	//GETTERS AND SETTERS
+	public int getId() {
+		return this.id;
+	}
+	
+	public Collection<Player> getPlayersInRoom() {
+		return playersInRoom.values();
+	}
+	
+	public int getMaxPlayersInRoom() {
+		return maxPlayers;
+	}
+	
+	public void setMaxPlayersInRoom(int maxPlayers) {
+		this.maxPlayers = maxPlayers;
+	}
+	
+	public int getNumPlayersInRoom() {
+		return numPlayersInRoom.get();
+	}
+	
+	public void incrementNumPlayersInRoom () {
+		this.numPlayers.getAndIncrement();
+	}
+	
+	public void addPlayerToRoom(Player player) {
+		playersInRoom.put(player.getSession().getId(), player);	//numPlayers los inserta en el mapa en el orden en el que entran (como una list)
+		
+		player.setRoom(this);
+		System.out.println("Sala: "+player.getRoom().getId());
+		
+		if (DEBUG_MODE)
+			System.out.println("[DEBUG J] Room "+ id + ": se ha unido el player " + numPlayers + " (ID: [" + player.getSession().getId() + "]). Players en la room " + numPlayers);
+	}
+	
+	public void removePlayerFromRoom(Player player) {
+		playersInRoom.remove(player.getSession().getId());	//numPlayers los inserta en el mapa en el orden en el que entran (como una list)
+		numPlayers.getAndDecrement();
+		
+		if (DEBUG_MODE)
+			System.out.println("[DEBUG J] Room "+ id + ": se ha ido el player " + player.getPlayerId() + " (ID: [" + player.getSession().getId() + "]). Players en la room " + numPlayers.getAndDecrement());
+		//player.setRoom(null);
+		
+	}
+	
+	//Envía un mensaje a todos los jugadores de una misma sala
+	public void roomBroadcast(String message) {
+		for (Player player : getPlayersInRoom()) {
+			try {
+				player.getSession().sendMessage(new TextMessage(message.toString()));
+			} catch (Throwable ex) {
+				System.err.println("Exception sending message to player " + player.getSession().getId());
+				ex.printStackTrace(System.err);
+				game.removePlayer(player);
+			}
+		}
+	}
+	
+	//MÉTODOS ORIGINALES DE SPACEWARGAME
+	private void tick() {
+		ObjectNode json = mapper.createObjectNode();
+		ArrayNode arrayNodePlayers = mapper.createArrayNode();
+		ArrayNode arrayNodeProjectiles = mapper.createArrayNode();
+
+		long thisInstant = System.currentTimeMillis();
+		Set<Integer> bullets2Remove = new HashSet<>();
+		boolean removeBullets = false;
+
+		try {
+			// Update players
+			for (Player player : getPlayersInRoom()) {
+				player.calculateMovement();
+
+				ObjectNode jsonPlayer = mapper.createObjectNode();
+				jsonPlayer.put("id", player.getPlayerId());
+				jsonPlayer.put("shipType", player.getShipType());
+				jsonPlayer.put("posX", player.getPosX());
+				jsonPlayer.put("posY", player.getPosY());
+				jsonPlayer.put("facingAngle", player.getFacingAngle());
+				arrayNodePlayers.addPOJO(jsonPlayer);
+			}
+
+			// Update projectiles and handle collision
+			for (Projectile projectile : getProjectiles()) {
+				projectile.applyVelocity2Position();
+
+				// Handle collision
+				for (Player player : getPlayersInRoom()) {
+					if ((projectile.getOwner().getPlayerId() != player.getPlayerId()) && player.intersect(projectile)) {
+						// System.out.println("Player " + player.getPlayerId() + " was hit!!!");
+						projectile.setHit(true);
+						break;
+					}
+				}
+
+				ObjectNode jsonProjectile = mapper.createObjectNode();
+				jsonProjectile.put("id", projectile.getId());
+
+				if (!projectile.isHit() && projectile.isAlive(thisInstant)) {
+					jsonProjectile.put("posX", projectile.getPosX());
+					jsonProjectile.put("posY", projectile.getPosY());
+					jsonProjectile.put("facingAngle", projectile.getFacingAngle());
+					jsonProjectile.put("isAlive", true);
+				} else {
+					removeBullets = true;
+					bullets2Remove.add(projectile.getId());
+					jsonProjectile.put("isAlive", false);
+					if (projectile.isHit()) {
+						jsonProjectile.put("isHit", true);
+						jsonProjectile.put("posX", projectile.getPosX());
+						jsonProjectile.put("posY", projectile.getPosY());
+					}
+				}
+				arrayNodeProjectiles.addPOJO(jsonProjectile);
+			}
+
+			if (removeBullets)
+				this.projectiles.keySet().removeAll(bullets2Remove);
+
+			json.put("event", "GAME STATE UPDATE");
+			json.putPOJO("players", arrayNodePlayers);
+			json.putPOJO("projectiles", arrayNodeProjectiles);
+
+			this.roomBroadcast(json.toString());
+		} catch (Throwable ex) {
+
+		}
+	}
+
+	public void addProjectile(int id, Projectile projectile) {
+		projectiles.put(id, projectile);
+	}
+
+	public Collection<Projectile> getProjectiles() {
+		return projectiles.values();
+	}
+
+	public void removeProjectile(Projectile projectile) {
+		playersInRoom.remove(projectile.getId(), projectile);
+	}
+
+	public void startGameLoop() {
+		scheduler = Executors.newScheduledThreadPool(1);
+		scheduler.scheduleAtFixedRate(() -> tick(), TICK_DELAY, TICK_DELAY, TimeUnit.MILLISECONDS);
+	}
+
+	public void stopGameLoop() {
+		if (scheduler != null) {
+			scheduler.shutdown();
+		}
+	}
+	
+}

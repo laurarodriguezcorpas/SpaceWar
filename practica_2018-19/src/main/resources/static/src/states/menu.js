@@ -6,7 +6,7 @@ Spacewar.menuState.prototype = {
 
 	init : function() {
 		if (game.global.DEBUG_MODE) {
-			console.log("[DEBUG] Entering **MENU** state");
+			console.log("[DEBUG JS] Entering **MENU** state");
 		}
 	},
 
@@ -31,15 +31,9 @@ Spacewar.menuState.prototype = {
 	},
 	
 	create : function() {
-		
-
-		
-
-		
 		background = game.add.tileSprite(0, 0, 1200, 800, 'background');
 		var buttonClassic = game.add.button(game.world.centerX - 85, 400, 'buttonStart', unirseARoom, this, 2, 1, 0);
 		buttonClassic.scale.setTo(0.5, 0.5);
-		
 		
 		var password = game.add.inputField(10, 90, {
 		    font: '18px Arial',
@@ -54,7 +48,7 @@ Spacewar.menuState.prototype = {
 		});
 		
 		function unirseARoom () {
-			game.state.start('gameState')
+			game.state.start('roomState')
 		}
 	},
 
