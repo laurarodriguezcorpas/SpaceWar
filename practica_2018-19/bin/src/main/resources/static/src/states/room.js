@@ -15,6 +15,7 @@ Spacewar.roomState.prototype = {
 	},
 
 	create : function() {
+		
 
 	},
 
