@@ -35,7 +35,7 @@ Spacewar.menuState.prototype = {
 		var buttonClassic = game.add.button(game.world.centerX - 85, 400, 'buttonStart', unirseARoom, this, 2, 1, 0);
 		buttonClassic.scale.setTo(0.5, 0.5);
 		
-		var password = game.add.inputField(10, 90, {
+		var name = game.add.inputField(10, 90, {
 		    font: '18px Arial',
 		    fill: '#212121',
 		    fontWeight: 'bold',
@@ -47,7 +47,21 @@ Spacewar.menuState.prototype = {
 		    placeHolder: 'NOMBRA A TU TROPitA: ',
 		});
 		
+		let msg = new Object()
+		msg.event = 'NAME'
+
+		msg.playerName = {
+			n: name
+		}
+		
+
 		function unirseARoom () {
+			
+			if (game.global.DEBUG_MODE) {
+				console.log("[DEBUG JS] Sending NAME message to server")
+			}
+			game.global.socket.send(JSON.stringify(msg))
+			
 			game.state.start('roomState')
 		}
 	},

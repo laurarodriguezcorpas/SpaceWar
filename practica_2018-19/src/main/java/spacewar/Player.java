@@ -47,6 +47,14 @@ public class Player extends Spaceship {
 		return this.room;
 	}
 	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String strin) {
+		this.name = strin;
+	}
+	
 	public void setRoom(Room room) {
 		this.room = room;
 	}
