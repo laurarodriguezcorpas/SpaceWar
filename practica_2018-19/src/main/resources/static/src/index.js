@@ -40,6 +40,7 @@ window.onload = function() {
 				console.dir(msg)	//console.dir imprime un objeto
 			}
 			game.global.myPlayer.id = msg.id	//Se asignna un id al jugador 
+			game.global.myPlayer.name = msg.name		//??????
 			game.global.myPlayer.shipType = msg.shipType	//Se asigna una nave al jugador
 			if (game.global.DEBUG_MODE) {
 				console.log('[DEBUG JS] ID assigned to player: ' + game.global.myPlayer.id)
@@ -52,7 +53,10 @@ window.onload = function() {
 				console.dir(msg)
 			}
 			game.global.myPlayer.room = {	//Le asigna un nombre a la habitación nueva y se la pasa al jugador que la crea
-					name : msg.room
+					room : msg.room
+			}
+			game.global.myPlayer.name = {	
+					name : msg.name
 			}
 			break
 		case 'JOIN TO EXISTING' :

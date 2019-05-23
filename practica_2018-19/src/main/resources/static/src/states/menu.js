@@ -1,5 +1,5 @@
 Spacewar.menuState = function(game) {
-
+	var textoNombreUsuario;
 }
 
 Spacewar.menuState.prototype = {
@@ -13,11 +13,12 @@ Spacewar.menuState.prototype = {
 	preload : function() {
 		// In case JOIN message from server failed, we force it
 		var background = game.load.image('background','assets/images/menuWallpaper.jpg');
+		var logo = game.load.image('logoSpaceWars','assets/images/logoSpaceWars.png');
 		game.load.image('buttonStart','assets/images/buttonStart.png');
 		
 		if (typeof game.global.myPlayer.id == 'undefined') {
 			if (game.global.DEBUG_MODE) {
-				console.log("[DEBUG] Forcing joining server...");
+				console.log("[DEBUG JS] Forcing joining server...");
 			}
 			let message = {
 				event : 'JOIN'
@@ -25,36 +26,46 @@ Spacewar.menuState.prototype = {
 			game.global.socket.send(JSON.stringify(message))
 
 		}
-		
 		game.add.plugin(PhaserInput.Plugin);
-
-		
 	},
 	
 	create : function() {
 		background = game.add.tileSprite(0, 0, 1200, 800, 'background');
-		var buttonStart = game.add.button(game.world.centerX - 85, 400, 'buttonStart', matchmaking, this, 2, 1, 0);
+		logoSpaceWars = game.add.tileSprite(130, 60, 1097, 107, 'logoSpaceWars');
+		logoSpaceWars.scale.setTo(0.7, 0.7);
+		var buttonStart = game.add.button(game.world.centerX - 75, 400, 'buttonStart', matchmaking, this, 2, 1, 0);
 		buttonStart.scale.setTo(0.5, 0.5);
 		
-		var password = game.add.inputField(10, 90, {
+		textoNombreUsuario  = game.add.inputField(game.world.centerX-110, 250, {
 		    font: '18px Arial',
 		    fill: '#212121',
 		    fontWeight: 'bold',
-		    width: 150,
+		    width: 200,
 		    padding: 8,
 		    borderWidth: 1,
 		    borderColor: '#000',
 		    borderRadius: 6,
-		    placeHolder: 'NOMBRA A TU TROPitA: ',
+		    placeHolder: 'Introduce tu nombre: ',
 		});
+		
+		textoNombreUsuario.startFocus();
+		if (game.global.DEBUG_MODE) 
+			console.log("[DEBUG JS] Recoger aquí el nombre")
+		textoNombreUsuario.endFocus();
 		
 		function matchmaking () {
 			game.state.start('gameModeState')
 		}
+		
+		PhaserInput.onKeyboardClose.addOnce(function() {
+		    this.resizeBackgroundImage();
+		});
+		
 	},
 
 
 	update : function() {
+		textoNombreUsuario.update();
 		/*
 		if (typeof game.global.myPlayer.id !== 'undefined') {
 			game.state.start('lobbyState')

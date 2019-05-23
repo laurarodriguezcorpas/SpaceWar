@@ -67,3 +67,6 @@ practica_2018-19/target/classes/META-INF/maven/es.urjc.em.practica_2018-19/Laura
 *.snap
 *.index
 .metadata/.plugins/org.eclipse.core.resources/.projects/practica_2018-19/.indexes/e4/b9/22/22/history.index
+.metadata/.plugins/org.eclipse.e4.workbench/workbench.xmi
+*.xmi
+*.xmi

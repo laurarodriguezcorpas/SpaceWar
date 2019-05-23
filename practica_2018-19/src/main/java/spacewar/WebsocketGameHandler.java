@@ -47,6 +47,7 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 			case "JOIN":
 				msg.put("event", "JOIN");
 				msg.put("id", player.getPlayerId());
+				msg.put("name", player.getPlayerName());
 				msg.put("shipType", player.getShipType());
 				player.getSession().sendMessage(new TextMessage(msg.toString()));
 				break;

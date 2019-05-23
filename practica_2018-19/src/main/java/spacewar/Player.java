@@ -5,9 +5,12 @@ import java.util.Random;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class Player extends Spaceship {
 //Player es un Wrapper de Spaceship
 	private final WebSocketSession session;
+	private String playerName="";
 	private final int playerId;
 	private final String shipType;
 	private Room room;	
@@ -31,6 +34,10 @@ public class Player extends Spaceship {
 		return this.playerId;
 	}
 
+	public String getPlayerName() {
+		return this.playerName;
+	}
+	
 	public WebSocketSession getSession() {
 		return this.session;
 	}
@@ -62,4 +69,5 @@ public class Player extends Spaceship {
 	public void exitRoom() {
 		room.removePlayerFromRoom(this);
 	}
+
 }
