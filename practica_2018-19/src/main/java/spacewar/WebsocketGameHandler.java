@@ -74,7 +74,8 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 				player.loadMovement(node.path("movement").get("thrust").asBoolean(),
 						node.path("movement").get("brake").asBoolean(),
 						node.path("movement").get("rotLeft").asBoolean(),
-						node.path("movement").get("rotRight").asBoolean());
+						node.path("movement").get("rotRight").asBoolean(),
+						node.path("movement").get("prop").asBoolean());
 				if (node.path("bullet").asBoolean()) {
 					Projectile projectile = new Projectile(player, this.projectileId.incrementAndGet());
 					//game.addProjectile(projectile.getId(), projectile); 				//Linea original
@@ -95,6 +96,19 @@ public class WebsocketGameHandler extends TextWebSocketHandler {
 				game.broadcast(msgExit.toString());	//Broadcast es para enviar mensajes globales
 				
 				break;
+				
+			case "NAME":
+				
+				player.setName(node.path("playerName").get("n").toString()); //set del nombre
+				
+				msg.put("event", "NAME");
+				msg.put("id", player.getPlayerId());
+				msg.put("shipType", player.getShipType());
+				msg.put("name", player.getName());
+				player.getSession().sendMessage(new TextMessage(msg.toString()));//Usar esto para enviar un mensaje a los jugadores
+				
+				break;
+				
 			default:
 				break;
 			}

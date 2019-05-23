@@ -70,6 +70,9 @@ Spacewar.gameState.prototype = {
 			////propulsor
 			var barConfig = {x: 200, y: 200};
 			this.myPropBar = new HealthBar(this.game, barConfig);
+			this.propVal=100;
+			this.texto = game.add.text(this.myPropBar.x-50, this.myPropBar.y-20, this.propVal, { font: "30px Arial", fill: "#000000", align: "center" });
+			
 		
 			//////
 			
@@ -107,13 +110,14 @@ Spacewar.gameState.prototype = {
 		this.sKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
 		this.aKey = game.input.keyboard.addKey(Phaser.Keyboard.A);
 		this.dKey = game.input.keyboard.addKey(Phaser.Keyboard.D);
+		this.eKey = game.input.keyboard.addKey(Phaser.Keyboard.E);
 		this.spaceKey = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 		// Añadir Q como botón para salir del juego
 	
 	
 		// Stop the following keys from propagating up to the browser
 		game.input.keyboard.addKeyCapture([ Phaser.Keyboard.W,
-				Phaser.Keyboard.S, Phaser.Keyboard.A, Phaser.Keyboard.D,
+				Phaser.Keyboard.S, Phaser.Keyboard.A, Phaser.Keyboard.D, Phaser.Keyboard.E,
 				Phaser.Keyboard.SPACEBAR, Phaser.Keyboard.Q ]);
 
 		game.camera.follow(game.global.myPlayer.image);
@@ -163,7 +167,8 @@ Spacewar.gameState.prototype = {
 			thrust : false,
 			brake : false,
 			rotLeft : false,
-			rotRight : false
+			rotRight : false,
+			prop : false
 		}
 
 		msg.bullet = false
@@ -178,6 +183,16 @@ Spacewar.gameState.prototype = {
 			msg.movement.rotLeft = true;
 		if (this.dKey.isDown)
 			msg.movement.rotRight = true;
+		
+		if (this.eKey.isDown && this.propVal > 0){
+			msg.movement.prop = true;
+		
+			this.propVal = this.propVal - 10;
+	        if(this.propVal < 0) this.propVal = 0;
+	        this.myPropBar.setPercent(this.propVal);
+	        this.texto.text = this.propVal;
+		}
+		
 		if (this.spaceKey.isDown) {
 			msg.bullet = this.fireBullet()
 		}
