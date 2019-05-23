@@ -3,9 +3,6 @@ Spacewar.gameState = function(game) {
 	this.fireBullet
 	this.numStars = 100 // Should be canvas size dependant
 	this.maxProjectiles = 800 // 8 per player
-	this.myHealthBar
-	this.myPropBar
-	this.ammo
 }
 
 Spacewar.gameState.prototype = {
@@ -44,8 +41,6 @@ Spacewar.gameState.prototype = {
 		game.global.myPlayer.image = game.add.sprite(0, 0, 'spacewar',
 				game.global.myPlayer.shipType)
 		game.global.myPlayer.image.anchor.setTo(0.5, 0.5)
-		
-	
 	},
 
 	create : function() {

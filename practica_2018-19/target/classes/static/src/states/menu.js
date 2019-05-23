@@ -27,13 +27,14 @@ Spacewar.menuState.prototype = {
 		}
 		
 		game.add.plugin(PhaserInput.Plugin);
+
 		
 	},
 	
 	create : function() {
 		background = game.add.tileSprite(0, 0, 1200, 800, 'background');
-		var buttonClassic = game.add.button(game.world.centerX - 85, 400, 'buttonStart', unirseARoom, this, 2, 1, 0);
-		buttonClassic.scale.setTo(0.5, 0.5);
+		var buttonStart = game.add.button(game.world.centerX - 85, 400, 'buttonStart', matchmaking, this, 2, 1, 0);
+		buttonStart.scale.setTo(0.5, 0.5);
 		
 		var password = game.add.inputField(10, 90, {
 		    font: '18px Arial',
@@ -47,8 +48,8 @@ Spacewar.menuState.prototype = {
 		    placeHolder: 'NOMBRA A TU TROPitA: ',
 		});
 		
-		function unirseARoom () {
-			game.state.start('roomState')
+		function matchmaking () {
+			game.state.start('gameModeState')
 		}
 	},
 

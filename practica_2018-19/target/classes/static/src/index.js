@@ -134,8 +134,8 @@ window.onload = function() {
 	game.state.add('menuState', Spacewar.menuState)			//Menú principal
 	game.state.add('lobbyState', Spacewar.lobbyState)
 	game.state.add('matchmakingState', Spacewar.matchmakingState)	
-	game.state.add('roomState', Spacewar.roomState)			//Pantalla de salas
 	game.state.add('gameState', Spacewar.gameState)			//Pantalla del juego
+	game.state.add('gameModeState', Spacewar.gameModeState)	
 
 	game.state.start('bootState')
 
